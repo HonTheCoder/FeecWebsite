@@ -100,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     e.preventDefault();
                     const navbarHeight = document.getElementById('navbar')?.offsetHeight || 90;
                     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-                    // Immediately reflect active state on the clicked link (helps mobile menu)
                     if (typeof updateActiveNavLink === 'function') {
                         updateActiveNavLink(target.id);
                     }
@@ -147,12 +146,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // Remove active class from all nav links
         navLinks.forEach(link => {
             link.classList.remove('active');
+            link.removeAttribute('aria-current');
         });
 
         // Find and activate the corresponding nav link
         const activeMapping = sectionNavMap.find(item => item.sectionId === activeSectionId);
         if (activeMapping && activeMapping.navLink) {
             activeMapping.navLink.classList.add('active');
+            activeMapping.navLink.setAttribute('aria-current', 'page');
         }
     }
 
@@ -293,17 +294,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Set initial active link
     setInitialActiveLink();
     
-    // Also update on scroll to handle edge cases
     let scrollTimeout;
     window.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-            // The Intersection Observer handles most cases, this is just a backup
         }, 50);
     });
+
+    const skeleton = document.getElementById('skeleton');
+    function hideSkeleton() {
+        if (skeleton) {
+            skeleton.classList.add('hidden');
+            setTimeout(() => { try { skeleton.remove(); } catch (_) {} }, 300);
+        }
+    }
+    window.addEventListener('load', hideSkeleton);
+    setTimeout(hideSkeleton, 1200);
 
     // 10. Quote Form - Validation and Mailto Submission
     const quoteForm = document.getElementById('quoteForm');
